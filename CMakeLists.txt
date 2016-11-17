@@ -14,7 +14,15 @@ else ()
     include_directories ($ENV{DXSDK_DIR}/Include)
 endif ()
 
-include_directories("${CMAKE_CURRENT_LIST_DIR}/include")
+if(APPLE) #for some reason on apple opencl is expected under OpenCL
+    set(opencl_include_dir "${CMAKE_CURRENT_BINARY_DIR}/include")
+    if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/include/CL")
+        file(COPY "${CMAKE_CURRENT_LIST_DIR}/include/CL/" DESTINATION "${opencl_include_dir}/OpenCL")
+    endif()
+else()
+   set(opencl_include_dir "${CMAKE_CURRENT_LIST_DIR}/include")
+endif()
+include_directories("${opencl_include_dir}")
 
 add_library (OpenCL SHARED ${OPENCL_ICD_LOADER_SOURCES})
 set_target_properties (OpenCL PROPERTIES VERSION "1.2" SOVERSION "1")
@@ -55,7 +63,7 @@ install(
 )
 
 install(
-    DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/include/"
+    DIRECTORY "${opencl_include_dir}/"
     DESTINATION "${include_install_dir}"
 )
 
